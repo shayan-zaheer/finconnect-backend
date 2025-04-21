@@ -1,7 +1,6 @@
 const asyncErrorHandler = require('../utils/asyncErrorHandler');
 
-  console.log(process.env.STRIPE_KEY)
-const stripe = require('stripe')(`sk_test_51RGP12RsDFnsLDBhCbLYO4sHcZmJVltHrkCIUM5SOlt3eZ07kuMIGWLBEHKmACdB6wwLT1B3XkN7D34vXYO9Acz6008OudOLek`);
+const stripe = require('stripe')(process.env.STRIPE_KEY);
 
 const baseURL = process.env.baseURL
 
