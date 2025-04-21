@@ -7,6 +7,8 @@ const authRoutes = require("./routes/authRoutes");
 const globalErrorHandler = require('./controllers/errorController');
 const { startSQL } = require('./config/db');
 const paymentRoutes = require("./routes/stripeRoutes")
+const webHookController = require("./controllers/webHookController")
+
 const fintechRoutes = require("./routes/fintechRoutes");
 const apiRoutes = require("./routes/apiRoutes");
 
@@ -17,6 +19,8 @@ app.use(cors({
     origin: "http://localhost:5173",
     credentials: true,
 }));
+
+app.post("/webhooks", express.raw({ type: 'application/json' }),webHookController.listenWebhooks)
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -36,3 +40,5 @@ app.use(globalErrorHandler);
 app.listen(PORT, () => {
     console.log(`Server is listening on PORT ${PORT}`);
 });
+
+module.exports = {express}
