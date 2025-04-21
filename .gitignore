@@ -1,0 +1,50 @@
+# Node modules
+node_modules/
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Runtime data
+pids/
+*.pid
+*.seed
+*.pid.lock
+
+# Environment variables
+.env
+.env.*  # for multiple environments like .env.dev, .env.prod
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# IDEs
+.vscode/
+.idea/
+
+# Coverage reports
+coverage/
+
+# Build output
+dist/
+build/
+
+# Misc
+*.tgz
+*.bak
+*.tmp
+*.swp
+
+# PM2 logs (if using PM2 process manager)
+.pids/
+pm2.log
+
+# Optional: test coverage tools like nyc
+.nyc_output/
+
+# Optional: if using TypeScript
+*.tsbuildinfo
