@@ -5,10 +5,10 @@ const bcrypt = require("bcryptjs");
 const User = sequelize.define(
     "User",
     {
-        userId: {
-            type: DataTypes.INTEGER,
+        accountNumber: {
+            type: DataTypes.UUID,
             primaryKey: true,
-            autoIncrement: true,
+            defaultValue: DataTypes.UUIDV4,
         },
         name: {
             type: DataTypes.STRING,
@@ -32,6 +32,18 @@ const User = sequelize.define(
         isSubscribed: {
             type: DataTypes.BOOLEAN,
             defaultValue: false,
+        },
+        subscriptionId: {
+            type: DataTypes.INTEGER,
+            allowNull: true,
+            references: {
+                model: "Subscription",
+                key: "subscriptionId",
+            },
+        },
+        balance: {
+            type: DataTypes.NUMBER,
+            defaultValue: 0,
         },
     },
     {
