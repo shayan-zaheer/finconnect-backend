@@ -1,7 +1,8 @@
 const User = require("../models/User");
+const CustomError = require("../utils/CustomError");
 
 const apiKeyCheck = async (request, response, next) => {
-    const { apiKey } = request.body;
+    const apiKey = request.headers["x-api-key"];
 
     if (!apiKey){
         const error = new CustomError("API Key missing", 401);

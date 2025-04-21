@@ -37,12 +37,12 @@ exports.login = asyncErrorHandler(async (request, response, next) => {
 
     const token = jwt.sign(
         {
-            userId: user.userId,
+            accountNumber: user.accountNumber,
             role: user.role,
         },
         process.env.JWT_SECRET,
         { expiresIn: "1h" }
     );
 
-    return response.status(200).json({ token });
+    return response.status(200).json({ user, token });
 });
