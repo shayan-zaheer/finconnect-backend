@@ -1,41 +1,44 @@
 const asyncErrorHandler = require('../utils/asyncErrorHandler');
 
-const stripe = require('stripe')(process.env.STRIPE_KEY);
+  console.log(process.env.STRIPE_KEY)
+const stripe = require('stripe')(`sk_test_51RGP12RsDFnsLDBhCbLYO4sHcZmJVltHrkCIUM5SOlt3eZ07kuMIGWLBEHKmACdB6wwLT1B3XkN7D34vXYO9Acz6008OudOLek`);
 
 const baseURL = process.env.baseURL
 
 
-exports.createCheckoutSession = asyncErrorHandler(async (request, response, next) => {
-    const {priceId} = req.body;
-    const session = await stripe.checkout.sessions.create({
-        mode: 'subscription',
-        line_items: [
-          {
-            price: priceId,
-            // For metered billing, do not pass quantity
-            quantity: 1,
-          },
-        ],
-        // {CHECKOUT_SESSION_ID} is a string literal; do not change it!
-        // the actual Session ID is returned in the query parameter when your customer
-        // is redirected to the success page.
-        success_url: `${baseURL}/paymentSuccess?session_id={CHECKOUT_SESSION_ID}`,
-        cancel_url: `${baseURL}/paymentFailed`,
-      });
 
-      console.log(session.url)
-      res.status(200).json({
-        status:"Success",
-        redirectURL:session.url
-      });
-});
+  exports.createCheckoutSession = asyncErrorHandler(async (req, res, next) => {
+    const {priceId} = req.body;
+      console.log(priceId)
+      const session = await stripe.checkout.sessions.create({
+          mode: 'subscription',
+          line_items: [
+            {
+              price: priceId,
+              // For metered billing, do not pass quantity
+              quantity: 1,  
+            },
+          ],
+          // {CHECKOUT_SESSION_ID} is a string literal; do not change it!
+          // the actual Session ID is returned in the query parameter when your customer
+          // is redirected to the success page.
+          success_url: `${baseURL}/paymentSuccess?session_id={CHECKOUT_SESSION_ID}`,
+          cancel_url: `${baseURL}/paymentFailed`,
+        });
+
+        console.log(session.url)
+        res.status(200).json({
+          status:"Success",
+          redirectURL:session.url
+        });
+  });
 
 
 exports.listenWebhooks = asyncErrorHandler(async (req,res,next)=>{
     let data;
   let eventType;
   // Check if webhook signing is configured.
-  const webhookSecret = WEBHOOK_KEY;
+  const webhookSecret = process.env.WEBHOOK_KEY;
   if (webhookSecret) {
     // Retrieve the event by verifying the signature using the raw body and secret.
     let event;
