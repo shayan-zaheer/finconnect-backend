@@ -5,18 +5,18 @@ const User = require('../models/User');
 const asyncErrorHandler = require('../utils/asyncErrorHandler');
 
 const checkSubscriptionLimit = asyncErrorHandler(async (req, res, next) => {
-  const { userId, amount } = req.body;
+  const { accountNumber, amount } = req.body;
 
-  if (!userId || typeof amount !== 'number') {
+  if (!accountNumber || typeof amount !== 'number') {
     return next({
       status: 400,
-      message: 'Missing or invalid userId or amount'
+      message: 'Missing or invalid accountNumber or amount'
     });
   }
 
   // Step 1: Get the user and their subscription
   const user = await User.findOne({
-    where: { accountNumber: userId },
+    where: { accountNumber: accountNumber },
     include: {
       model: Subscription,
       attributes: ['transactionLimit', 'price'],
@@ -32,7 +32,7 @@ const checkSubscriptionLimit = asyncErrorHandler(async (req, res, next) => {
 
   // Step 2: Get their current usage from the Limit table
   const limit = await Limit.findOne({
-    where: { userId },
+    where: { accountNumber },
   });
 
   if (!limit) {
