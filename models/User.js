@@ -46,6 +46,10 @@ const User = sequelize.define(
             type: DataTypes.INTEGER,
             defaultValue: 0,
         },
+        customerId:{
+            type:DataTypes.TEXT,
+            allowNull:true
+        }
     },
     {
         hooks: {
