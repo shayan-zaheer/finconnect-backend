@@ -5,7 +5,7 @@ const asyncErrorHandler = require("../utils/asyncErrorHandler");
 const CustomError = require("../utils/CustomError");
 
 exports.register = asyncErrorHandler(async (request, response, next) => {
-    const { name, email, password, role } = request.body;
+    const { name, email, password } = request.body;
 
     const existing = await User.findOne({ where: { email } });
     if (existing){
@@ -13,11 +13,11 @@ exports.register = asyncErrorHandler(async (request, response, next) => {
         return next(error);
     }
 
-    const user = await User.create({ name, email, password, role });
+    const user = await User.create({ name, email, password });
 
     return response
         .status(201)
-        .json({ message: "Registration successful", userId: user.userId });
+        .json({ message: "Registration successful", userId: user.accountNumber });
 });
 
 exports.login = asyncErrorHandler(async (request, response, next) => {
