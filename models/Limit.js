@@ -1,37 +1,37 @@
 const { DataTypes } = require("sequelize");
 const { sequelize } = require("../config/db");
 const User = require("./User");
-
+const Subscription = require("./Subscription");
 
 const Limit = sequelize.define("Limit", {
-  userId: {
-    type: DataTypes.UUID,
-    allowNull: false,
-    references: {
-      model: "User", // Table name (not the model file name)
-      key: "accountNumber", // Assuming this is your PK
+    userId: {
+        type: DataTypes.UUID,
+        allowNull: false,
+        references: {
+            model: User,
+            key: "accountNumber",
+        },
     },
-  },
-  subscriptionId: {
-    type: DataTypes.INTEGER,
-    allowNull: false,
-    references: {
-      model: "Subscription",
-      key: "subscriptionId", // Adjust if different
+    subscriptionId: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        references: {
+            model: Subscription,
+            key: "subscriptionId",
+        },
     },
-  },
-  transactionAmount: {
-    type: DataTypes.FLOAT,
-    allowNull: false,
-  },
-  noOfTransactions: {
-    type: DataTypes.INTEGER,
-    allowNull: false,
-  },
-  lastBilledOn: {
-    type: DataTypes.DATE,
-    allowNull: false,
-  },
+    transactionAmount: {
+        type: DataTypes.FLOAT,
+        allowNull: false,
+    },
+    noOfTransactions: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+    },
+    lastBilledOn: {
+        type: DataTypes.DATE,
+        allowNull: false,
+    },
 });
 
 module.exports = Limit;

@@ -38,7 +38,7 @@ const User = sequelize.define(
             type: DataTypes.INTEGER,
             allowNull: true,
             references: {
-                model: "Subscription",
+                model: Subscription,
                 key: "subscriptionId",
             },
         },
@@ -46,9 +46,14 @@ const User = sequelize.define(
             type: DataTypes.INTEGER,
             defaultValue: 0,
         },
-        customerId:{
-            type:DataTypes.TEXT,
-            allowNull:true
+        apiKey: {
+            type: DataTypes.STRING,
+            allowNull: true,
+            unique: true,
+        },
+        customerId: {
+            type: DataTypes.TEXT,
+            allowNull: true
         }
     },
     {

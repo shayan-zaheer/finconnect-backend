@@ -9,6 +9,8 @@ const { startSQL } = require('./config/db');
 const paymentRoutes = require("./routes/stripeRoutes")
 const webHookController = require("./controllers/webHookController")
 
+const fintechRoutes = require("./routes/fintechRoutes");
+const apiRoutes = require("./routes/apiRoutes");
 
 const app = express();
 const PORT = 8000;
@@ -27,7 +29,9 @@ app.use(cookieParser());
 app.use(morgan("dev"));
 
 app.use("/api/auth", authRoutes);
-app.use("/api/pay", express.raw({ type: 'application/json' }),paymentRoutes)
+app.use("/api/pay",paymentRoutes)
+app.use("/api/fintech",fintechRoutes);
+app.use("/api/key", apiRoutes);
 
 startSQL();
 

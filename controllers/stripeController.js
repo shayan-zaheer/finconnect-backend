@@ -7,8 +7,6 @@ const stripe = require('stripe')(stripe_key);
 const express = require('express');
 const baseURL = process.env.baseURL
 
-
-
   exports.createCheckoutSession = asyncErrorHandler(async (req, res, next) => {
    
     const {userId} = req.body
