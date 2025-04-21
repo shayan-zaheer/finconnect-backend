@@ -7,8 +7,8 @@ const authRoutes = require("./routes/authRoutes");
 const globalErrorHandler = require('./controllers/errorController');
 const { startSQL } = require('./config/db');
 const paymentRoutes = require("./routes/stripeRoutes")
-
-
+const fintechRoutes = require("./routes/fintechRoutes");
+const apiRoutes = require("./routes/apiRoutes");
 
 const app = express();
 const PORT = 8000;
@@ -26,6 +26,8 @@ app.use(morgan("dev"));
 
 app.use("/api/auth", authRoutes);
 app.use("/api/pay",paymentRoutes)
+app.use("/api/fintech",fintechRoutes);
+app.use("/api/key", apiRoutes);
 
 startSQL();
 

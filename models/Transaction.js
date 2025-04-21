@@ -1,5 +1,6 @@
 const { DataTypes } = require("sequelize");
 const { sequelize } = require("../config/db");
+const User = require("./User");
 
 const Transaction = sequelize.define(
     "Transaction",
@@ -13,7 +14,7 @@ const Transaction = sequelize.define(
             type: DataTypes.UUID,
             allowNull: false,
             references: {
-                model: "User",
+                model: User,
                 key: "accountNumber",
             },
         },
@@ -21,7 +22,7 @@ const Transaction = sequelize.define(
             type: DataTypes.UUID,
             allowNull: false,
             references: {
-                model: "User",
+                model: User,
                 key: "accountNumber",
             },
         },

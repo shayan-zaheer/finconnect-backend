@@ -4,8 +4,6 @@ const stripe = require('stripe')(process.env.STRIPE_KEY);
 
 const baseURL = process.env.baseURL
 
-
-
   exports.createCheckoutSession = asyncErrorHandler(async (req, res, next) => {
     const {priceId} = req.body;
       console.log(priceId)
