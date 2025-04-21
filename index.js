@@ -6,6 +6,9 @@ const morgan = require('morgan');
 const authRoutes = require("./routes/authRoutes");
 const globalErrorHandler = require('./controllers/errorController');
 const { startSQL } = require('./config/db');
+const paymentRoutes = require("./routes/stripeRoutes")
+
+
 
 const app = express();
 const PORT = 8000;
@@ -22,6 +25,7 @@ app.use(cookieParser());
 app.use(morgan("dev"));
 
 app.use("/api/auth", authRoutes);
+app.use("/api/pay",paymentRoutes)
 
 startSQL();
 
