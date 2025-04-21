@@ -14,7 +14,7 @@ const Subscription = sequelize.define(
             allowNull: false,
         },
         price: {
-            type: DataTypes.NUMBER,
+            type: DataTypes.INTEGER,
             allowNull: false,
         },
         description: {
@@ -22,11 +22,11 @@ const Subscription = sequelize.define(
             allowNull: false,
         },
         transactionLimit: {
-            type: DataTypes.NUMBER,
+            type: DataTypes.INTEGER,
             allowNull: false,
         },
         transactionPerDay: {
-            type: DataTypes.NUMBER,
+            type: DataTypes.INTEGER,
             allowNull: false,
         },
         invoice: {
@@ -37,7 +37,9 @@ const Subscription = sequelize.define(
             type: DataTypes.BOOLEAN,
             allowNull: false,
         }
-    }
+    }, {
+        freezeTableName: true // prevents Sequelize from pluralizing
+      }
 );
 
 module.exports = Subscription;

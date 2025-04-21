@@ -1,6 +1,7 @@
 const { DataTypes } = require("sequelize");
 const { sequelize } = require("../config/db");
 const bcrypt = require("bcryptjs");
+const Subscription = require("./Subscription");
 
 const User = sequelize.define(
     "User",
@@ -42,7 +43,7 @@ const User = sequelize.define(
             },
         },
         balance: {
-            type: DataTypes.NUMBER,
+            type: DataTypes.INTEGER,
             defaultValue: 0,
         },
     },
