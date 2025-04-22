@@ -37,4 +37,16 @@ const Transaction = sequelize.define(
     }
 );
 
+Transaction.belongsTo(User, {
+    foreignKey: 'senderAccount',
+    targetKey: 'accountNumber',
+    as: 'sender',
+  });
+  
+  Transaction.belongsTo(User, {
+    foreignKey: 'receiverAccount',
+    targetKey: 'accountNumber',
+    as: 'receiver',
+  });
+
 module.exports = Transaction;

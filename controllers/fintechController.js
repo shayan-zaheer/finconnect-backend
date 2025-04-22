@@ -26,24 +26,30 @@ exports.transferFunds = asyncErrorHandler(async (request, response, next) => {
   const { accountNumber, amount } = request.body;
   const user = request.user;
 
-  if (!accountNumber || !amount) {
-    const error = new CustomError(
-      "Account number and amount are required",
-      400
-    );
-    return next(error);
-  }
+    if (!accountNumber || !amount) {
+        return next(new CustomError("Account number and amount are required", 400));
+    }
 
-  if (user.balance < +amount) {
-    const error = new CustomError("Insufficient funds", 400);
-    return next(error);
-  }
+    if (user.balance < +amount) {
+        return next(new CustomError("Insufficient funds", 400));
+    }
 
-  const recipient = await User.findOne({ where: { accountNumber } });
-  if (!recipient) {
-    const error = new CustomError("Recipient not found", 404);
-    return next(error);
-  }
+    if (!user.apiKey) {
+        return next(new CustomError("You must be subscribed with an API key to send funds", 403));
+    }
+
+    const recipient = await User.findOne({ where: { accountNumber } });
+    if (!recipient) {
+        return next(new CustomError("Recipient not found", 404));
+    }
+
+    if(recipient.accountNumber === user.accountNumber) {
+        return next(new CustomError("You cannot send money to yourself", 400));
+    }
+
+    if (!recipient.subscriptionId) {
+        return next(new CustomError("The receiving user hasn't subscribed to any plan", 403));
+    }
 
   user.balance -= +amount;
   recipient.balance += +amount;
@@ -51,25 +57,21 @@ exports.transferFunds = asyncErrorHandler(async (request, response, next) => {
   await user.save();
   await recipient.save();
 
-  await Transaction.create({
-    senderAccount: user.accountNumber,
-    receiverAccount: recipient.accountNumber,
-    amount,
-    status: "completed",
-  });
+    await Transaction.create({
+        senderAccount: user.accountNumber,
+        receiverAccount: recipient.accountNumber,
+        amount,
+        status: "completed",
+    });
 
-  const limit = await Limit.findOne({
-    where: { userId: user.accountNumber },
-  });
+    const limit = await Limit.findOne({ where: { userId: user.accountNumber } });
+    if (limit) {
+        limit.transactionAmount += +amount;
+        limit.noOfTransactions += 1;
+        await limit.save();
+    }
 
-  const trAmount = limit.transactionAmount + +amount;
-  const noOfTrans = limit.noOfTransactions + 1;
-
-  await limit.update(
-    { transactionAmount: trAmount, noOfTransactions: noOfTrans },
-    { where: { userId: user.accountNumber } }
-  );
-  return response.status(200).json({ message: "Transfer successful" });
+    return response.status(200).json({ message: "Transfer successful" });
 });
 
 exports.getTransactionHistory = asyncErrorHandler(
@@ -86,16 +88,28 @@ exports.getTransactionHistory = asyncErrorHandler(
     const limit = +pageLimit || 5;
     const offset = (pageNumber - 1) * limit;
 
-    const transactions = await Transaction.findAndCountAll({
-      where: {
-        [Op.or]: [
-          { senderAccount: accountNumber },
-          { receiverAccount: accountNumber },
-        ],
-      },
-      limit,
-      offset,
-    });
+        const transactions = await Transaction.findAndCountAll({
+            where: {
+              [Op.or]: [
+                { senderAccount: accountNumber },
+                { receiverAccount: accountNumber },
+              ],
+            },
+            include: [
+              {
+                model: User,
+                as: 'sender',
+                attributes: ['name', 'email', 'accountNumber'],
+              },
+              {
+                model: User,
+                as: 'receiver',
+                attributes: ['name', 'email', 'accountNumber'],
+              },
+            ],
+            limit,
+            offset,
+          });
 
     return response.status(200).json({ transactions });
   }
