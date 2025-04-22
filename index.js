@@ -8,7 +8,7 @@ const globalErrorHandler = require('./controllers/errorController');
 const { startSQL } = require('./config/db');
 const paymentRoutes = require("./routes/stripeRoutes")
 const webHookController = require("./controllers/webHookController")
-
+const dashboardRoutes = require("./routes/dashboardRoutes")
 const fintechRoutes = require("./routes/fintechRoutes");
 const subscriptionRoutes = require("./routes/subscriptionRoutes");
 const adminRoutes = require("./routes/adminRoutes");
@@ -39,6 +39,7 @@ app.use("/api/fintech",fintechRoutes);
 app.use("/api/key", apiRoutes);
 app.use("/api/subscription", subscriptionRoutes);
 app.use("/api/admin", adminRoutes);
+app.use("/api/dashboard", dashboardRoutes);
 
 startSQL();
 

@@ -30,7 +30,7 @@ exports.login = asyncErrorHandler(async (request, response, next) => {
         include: {
             model: Subscription,
             as: "Subscription",
-            attributes: ["subscriptionId", "name", "price", "description", "transactionLimit", "transactionPerDay", "invoice", "priority"], 
+            attributes: ["subscriptionId", "name", "price", "description", "transactionLimit", "transactionPerDay", "invoice", "priority","price_id"], 
         },
     });
 

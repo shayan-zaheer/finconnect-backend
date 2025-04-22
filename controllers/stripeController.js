@@ -64,3 +64,10 @@ const portalSession = await stripe.billingPortal.sessions.create({
     customerPortal:portalSession.url
   })
 })
+
+
+exports.deleteSubscription = asyncErrorHandler(async (req,res,next)=>{
+ 
+const subscription = await stripe.subscriptions.cancel(`${req.subscriptionId}`);
+// console.log("DELETED SUBSCRIPTION FROM ENDPOINT",subscription)
+})

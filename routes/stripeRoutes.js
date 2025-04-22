@@ -4,6 +4,7 @@ const paymentController = require("../controllers/stripeController");
 
 router.post("/createSession", paymentController.createCheckoutSession);
 router.post("/customerPortal", paymentController.customerPortal);
+router.delete("/deleteSubscription", paymentController.deleteSubscription);
 
 
 module.exports = router;
