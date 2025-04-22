@@ -39,13 +39,15 @@ exports.listenWebhooks = asyncErrorHandler(async (req,res,next)=>{
     eventType = req.body.type;
   }
 
-const userId = data.object.metadata.userId;
-const subscriptionId = data.object.metadata.subscriptionId;
+  console.log("EVENT TYPE --->",eventType)
+  const userId = data.object.metadata.userId;
+  const subscriptionId = data.object.metadata.subscriptionId;
   switch (eventType) {
     case 'checkout.session.completed':
       // Payment is successful and the subscription is created.
       // You should provision the subscription and save the customer ID to your database.
-     let res = await User.update({customerId:data.object.customer, isSubscribed:true},{where:{
+      console.log("Data",data.object.subscription)
+     let res = await User.update({customerId:data.object.customer, isSubscribed:true,subscriptionId,stripeSubId:data.object.subscription},{where:{
         accountNumber:userId
     }})
     
@@ -62,13 +64,18 @@ const subscriptionId = data.object.metadata.subscriptionId;
       // Continue to provision the subscription as payments continue to be made.
       // Store the status in your database and check when a user accesses your service.
       // This approach helps you avoid hitting rate limits.
-
+      console.log(data.object.hosted_invoice_url)
      let res2 = await Limit.update({
-        lastBilledOn: new Date()
+        lastBilledOn: new Date(),
+        transactionAmount: 0,
+        noOfTransactions:0
       },{
         where:{
             userId
         }
+      })
+      res2 = await User.create({
+        userId:userId, invoiceUrl:data.object.hosted_invoice_url
       })
       console.log(res2)
       break;
@@ -83,6 +90,7 @@ const subscriptionId = data.object.metadata.subscriptionId;
       break;
 
       case 'customer.subscription.updated':
+        console.log(data.object)
         if (data.object.cancel_at_period_end) {
           // Subscription is set to cancel at the end of the period
           await User.update({ isSubscribed: false }, {
@@ -96,7 +104,7 @@ const subscriptionId = data.object.metadata.subscriptionId;
   
       case 'customer.subscription.deleted':
         // Subscription has been cancelled immediately or after the period
-        await User.update({ isSubscribed: false }, {
+        await User.update({ isSubscribed: false,stripeSubId:null }, {
           where: {
             accountNumber: userId
           }

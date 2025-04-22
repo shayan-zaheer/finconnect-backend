@@ -1,5 +1,6 @@
 const { DataTypes } = require("sequelize");
 const { sequelize } = require("../config/db");
+
 const User = require("./User");
 
 const StripeInvoice = sequelize.define("StripeInvoice", {
@@ -21,3 +22,4 @@ const StripeInvoice = sequelize.define("StripeInvoice", {
 });
 
 module.exports = StripeInvoice;
+

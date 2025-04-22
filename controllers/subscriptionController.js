@@ -12,7 +12,9 @@ exports.getAllSubscriptions = asyncErrorHandler(async (request, response, next) 
             "transactionLimit",
             "transactionPerDay",
             "invoice",
-            "priority"
+            "priority",
+            "price_id"
+
         ],
         order: [["subscriptionId", "ASC"]],
     });
