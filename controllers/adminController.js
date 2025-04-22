@@ -77,24 +77,23 @@ exports.getUsersBySubscription = asyncErrorHandler(
     }
 );
 
-exports.getTotalUsers = asyncErrorHandler(async (req, res, next) => {
-    const totalUsers = await User.count();
-    return res.status(200).json({ totalUsers });
-});
+exports.getStats = asyncErrorHandler(async (req, res, next) => {
+    const [totalUsers, totalTransactions, avgResult] = await Promise.all([
+        User.count(),
+        Transaction.count(),
+        Transaction.findAll({
+            attributes: [
+                [Transaction.sequelize.fn("AVG", Transaction.sequelize.col("amount")), "avgAmount"],
+            ],
+            raw: true,
+        }),
+    ]);
 
-exports.getTotalTransactions = asyncErrorHandler(async (req, res, next) => {
-    const totalTransactions = await Transaction.count();
-    return res.status(200).json({ totalTransactions });
-});
+    const avgAmount = parseFloat(avgResult[0].avgAmount || 0).toFixed(2);
 
-exports.getAverageTransactionAmount = asyncErrorHandler(async (req, res, next) => {
-    const result = await Transaction.findAll({
-        attributes: [
-            [Transaction.sequelize.fn("AVG", Transaction.sequelize.col("amount")), "avgAmount"],
-        ],
-        raw: true,
+    return res.status(200).json({
+        totalUsers,
+        totalTransactions,
+        avgAmount,
     });
-
-    const avgAmount = parseFloat(result[0].avgAmount || 0).toFixed(2);
-    return res.status(200).json({ avgAmount });
 });
