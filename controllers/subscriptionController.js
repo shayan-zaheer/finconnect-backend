@@ -4,7 +4,17 @@ const CustomError = require("../utils/CustomError");
 
 exports.getAllSubscriptions = asyncErrorHandler(async (request, response, next) => {
     const subscriptions = await Subscription.findAll({
-        attributes: ["subscriptionId", "name", "price", "description", "transactionLimit", "transactionPerDay", "invoice", "priority"],
+        attributes: [
+            "subscriptionId",
+            "name",
+            "price",
+            "description",
+            "transactionLimit",
+            "transactionPerDay",
+            "invoice",
+            "priority"
+        ],
+        order: [["subscriptionId", "ASC"]],
     });
 
     if (subscriptions.length === 0) {
@@ -18,7 +28,8 @@ exports.getAllSubscriptions = asyncErrorHandler(async (request, response, next) 
 exports.createSubscription = asyncErrorHandler(async (request, response, next) => {
     const { name, price, description, transactionLimit, transactionPerDay, invoice, priority } = request.body;
 
-    if (!name || !price || !description || !transactionLimit || !transactionPerDay || !invoice || !priority) {
+    if (!name || !price || !description || !transactionLimit || !transactionPerDay || !(invoice.toString()) || !(priority.toString())) {
+        console.log("Missing fields in request body", request.body);
         const error = new CustomError("All fields are required", 400);
         return next(error);
     }

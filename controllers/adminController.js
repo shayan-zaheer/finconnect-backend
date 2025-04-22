@@ -16,7 +16,7 @@ exports.getAllUsers = asyncErrorHandler(async(request, response, next) => {
 });
 
 exports.getAllLogs = asyncErrorHandler(async(request, response, next) => {
-    const logs = fs.readFileSync("../logs/activities.log", "utf-8").split("\n").filter(line => line.trim() !== "");
+    const logs = fs.readFileSync("logs/activities.log", "utf-8").split("\n").filter(line => line.trim() !== "");
     if(logs.length === 0) {
         const error = new CustomError("No logs found", 404);
         return next(error);
