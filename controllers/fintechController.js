@@ -1,5 +1,5 @@
 const User = require("../models/User");
-const Limit = require("../models/User");
+const Limit = require("../models/Limit");
 const Transaction = require("../models/Transaction");
 const asyncErrorHandler = require("../utils/asyncErrorHandler");
 const CustomError = require("../utils/CustomError");
@@ -27,22 +27,24 @@ exports.transferFunds = asyncErrorHandler(async (request, response, next) => {
     const user = request.user;
 
     if (!accountNumber || !amount) {
-        const error = new CustomError(
-            "Account number and amount are required",
-            400
-        );
-        return next(error);
+        return next(new CustomError("Account number and amount are required", 400));
     }
 
     if (user.balance < +amount) {
-        const error = new CustomError("Insufficient funds", 400);
-        return next(error);
+        return next(new CustomError("Insufficient funds", 400));
+    }
+
+    if (!user.apiKey) {
+        return next(new CustomError("You must be subscribed with an API key to send funds", 403));
     }
 
     const recipient = await User.findOne({ where: { accountNumber } });
     if (!recipient) {
-        const error = new CustomError("Recipient not found", 404);
-        return next(error);
+        return next(new CustomError("Recipient not found", 404));
+    }
+
+    if (!recipient.subscriptionId) {
+        return next(new CustomError("The receiving user hasn't subscribed to any plan", 403));
     }
 
     user.balance -= +amount;
@@ -58,15 +60,13 @@ exports.transferFunds = asyncErrorHandler(async (request, response, next) => {
         status: "completed",
     });
 
-    
-    const limit = await Limit.findOne({
-        where: { userId: user.accountNumber },
-    });
+    const limit = await Limit.findOne({ where: { userId: user.accountNumber } });
+    if (limit) {
+        limit.transactionAmount += +amount;
+        limit.noOfTransactions += 1;
+        await limit.save();
+    }
 
-    limit.transactionAmount += +amount;
-    limit.noOfTransactions += 1;
-
-    await limit.save();
     return response.status(200).json({ message: "Transfer successful" });
 });
 
@@ -86,14 +86,26 @@ exports.getTransactionHistory = asyncErrorHandler(
 
         const transactions = await Transaction.findAndCountAll({
             where: {
-                [Op.or]: [
-                    { senderAccount: accountNumber },
-                    { receiverAccount: accountNumber },
-                ],
+              [Op.or]: [
+                { senderAccount: accountNumber },
+                { receiverAccount: accountNumber },
+              ],
             },
+            include: [
+              {
+                model: User,
+                as: 'sender',
+                attributes: ['name', 'email', 'accountNumber'],
+              },
+              {
+                model: User,
+                as: 'receiver',
+                attributes: ['name', 'email', 'accountNumber'],
+              },
+            ],
             limit,
             offset,
-        });
+          });
 
         return response.status(200).json({ transactions });
     }

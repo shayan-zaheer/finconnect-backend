@@ -40,13 +40,22 @@ exports.getAllLogs = asyncErrorHandler(async (request, response, next) => {
 exports.getUsersBySubscription = asyncErrorHandler(
     async (request, response, next) => {
         const users = await User.findAll({
-            attributes: ["subscriptionId"],
+            attributes: ["name"],
+            include: {
+                model: Subscription,
+                as: "Subscription",
+            },
         });
 
+        if (users.length === 0) {
+            const error = new CustomError("No users found", 404);
+            return next(error);
+        }
+        
         const subscriptionCounts = {};
 
         users.forEach((user) => {
-            const subId = user.subscriptionId;
+            const subId = user.Subscription.name;
             if (subId) {
                 subscriptionCounts[subId] =
                     (subscriptionCounts[subId] || 0) + 1;
