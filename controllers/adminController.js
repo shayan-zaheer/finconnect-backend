@@ -1,3 +1,4 @@
+const Transaction = require("../models/Transaction");
 const User = require("../models/User");
 const asyncErrorHandler = require("../utils/asyncErrorHandler");
 const fs = require("fs");
@@ -40,6 +41,11 @@ exports.getAllLogs = asyncErrorHandler(async (request, response, next) => {
 exports.getUsersBySubscription = asyncErrorHandler(
     async (request, response, next) => {
         const users = await User.findAll({
+            where: {
+                subscriptionId: {
+                    [Op.ne]: null,
+                },
+            },
             attributes: ["name"],
             include: {
                 model: Subscription,
@@ -70,3 +76,25 @@ exports.getUsersBySubscription = asyncErrorHandler(
         return response.status(200).json(subscriptionCounts);
     }
 );
+
+exports.getTotalUsers = asyncErrorHandler(async (req, res, next) => {
+    const totalUsers = await User.count();
+    return res.status(200).json({ totalUsers });
+});
+
+exports.getTotalTransactions = asyncErrorHandler(async (req, res, next) => {
+    const totalTransactions = await Transaction.count();
+    return res.status(200).json({ totalTransactions });
+});
+
+exports.getAverageTransactionAmount = asyncErrorHandler(async (req, res, next) => {
+    const result = await Transaction.findAll({
+        attributes: [
+            [Transaction.sequelize.fn("AVG", Transaction.sequelize.col("amount")), "avgAmount"],
+        ],
+        raw: true,
+    });
+
+    const avgAmount = parseFloat(result[0].avgAmount || 0).toFixed(2);
+    return res.status(200).json({ avgAmount });
+});
