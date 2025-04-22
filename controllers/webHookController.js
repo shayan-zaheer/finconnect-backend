@@ -1,5 +1,6 @@
 
 const Limit = require('../models/Limit');
+const StripeInvoice = require('../models/StripeInvoice');
 const User = require('../models/User');
 const asyncErrorHandler = require('../utils/asyncErrorHandler');
 
@@ -54,8 +55,8 @@ exports.listenWebhooks = asyncErrorHandler(async (req,res,next)=>{
     res = await Limit.upsert({
         userId, // must match User.accountNumber
         subscriptionId,
-        transactionAmount: 5499.99,
-        noOfTransactions: 25,
+        transactionAmount: 0,
+        noOfTransactions: 0,
         lastBilledOn: new Date()
       });
     console.log(res)
@@ -74,7 +75,7 @@ exports.listenWebhooks = asyncErrorHandler(async (req,res,next)=>{
             userId
         }
       })
-      res2 = await User.create({
+      res2 = await StripeInvoice.create({
         userId:userId, invoiceUrl:data.object.hosted_invoice_url
       })
       console.log(res2)
