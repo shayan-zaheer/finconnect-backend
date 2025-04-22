@@ -79,6 +79,11 @@ exports.getTransactionHistory = asyncErrorHandler(
             return next(error);
         }
 
+        const { page, pageLimit } = request.query;
+        const pageNumber = +page || 1;
+        const limit = +pageLimit || 5;
+        const offset = (pageNumber - 1) * limit;
+
         const transactions = await Transaction.findAndCountAll({
             where: {
                 [Op.or]: [
@@ -86,6 +91,8 @@ exports.getTransactionHistory = asyncErrorHandler(
                     { receiverAccount: accountNumber },
                 ],
             },
+            limit,
+            offset,
         });
 
         return response.status(200).json({ transactions });
