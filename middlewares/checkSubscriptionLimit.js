@@ -4,9 +4,9 @@ const User = require("../models/User");
 const asyncErrorHandler = require("../utils/asyncErrorHandler");
 
 const checkSubscriptionLimit = asyncErrorHandler(async (req, res, next) => {
-    const { accountNumber, amount } = req.body;
+    const { sender, amount } = req.body;
 
-    if (!accountNumber || typeof amount !== "number") {
+    if (!sender || typeof amount !== "number") {
         return next({
             status: 400,
             message: "Missing or invalid accountNumber or amount",
@@ -14,7 +14,7 @@ const checkSubscriptionLimit = asyncErrorHandler(async (req, res, next) => {
     }
 
     const user = await User.findOne({
-        where: { accountNumber: accountNumber },
+        where: { accountNumber: sender },
         include: {
             model: Subscription,
             as: "Subscription",
@@ -30,7 +30,7 @@ const checkSubscriptionLimit = asyncErrorHandler(async (req, res, next) => {
     }
 
     const limit = await Limit.findOne({
-        where: { userId: accountNumber },
+        where: { userId: sender },
     });
 
     if (!limit) {
@@ -41,11 +41,12 @@ const checkSubscriptionLimit = asyncErrorHandler(async (req, res, next) => {
     }
 
     const maxTransactions = user.Subscription.transactionLimit;
-    const maxAmount = user.Subscription.price;
+    const maxAmount = user.Subscription.transactionLimit;
 
     console.log('MAX TRANSACTIONS', maxTransactions)
     console.log('MAX AMOUNT', maxAmount)
 
+    console.log(limit)
     const totalTransactionsAfterThis = limit.noOfTransactions + 1;
     const totalAmountAfterThis = limit.transactionAmount + amount;
 
