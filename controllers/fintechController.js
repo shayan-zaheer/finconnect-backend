@@ -7,24 +7,24 @@ const { Op } = require("sequelize");
 const { sequelize } = require("../config/db");
 
 exports.getBalance = asyncErrorHandler(async (request, response, next) => {
-    const { accountNumber } = request.user;
-    if (!accountNumber) {
-        const error = new CustomError("Account number is required", 400);
-        return next(error);
-    }
+  const { accountNumber } = request.user;
+  if (!accountNumber) {
+    const error = new CustomError("Account number is required", 400);
+    return next(error);
+  }
 
-    const user = await User.findOne({ where: { accountNumber } });
-    if (!user) {
-        const error = new CustomError("User not found", 404);
-        return next(error);
-    }
+  const user = await User.findOne({ where: { accountNumber } });
+  if (!user) {
+    const error = new CustomError("User not found", 404);
+    return next(error);
+  }
 
-    return response.status(200).json({ balance: user.balance });
+  return response.status(200).json({ balance: user.balance });
 });
 
 exports.transferFunds = asyncErrorHandler(async (request, response, next) => {
-    const { accountNumber, amount } = request.body;
-    const user = request.user;
+  const { accountNumber, amount } = request.body;
+  const user = request.user;
 
     if (!accountNumber || !amount) {
         return next(new CustomError("Account number and amount are required", 400));
@@ -43,15 +43,19 @@ exports.transferFunds = asyncErrorHandler(async (request, response, next) => {
         return next(new CustomError("Recipient not found", 404));
     }
 
+    if(recipient.accountNumber === user.accountNumber) {
+        return next(new CustomError("You cannot send money to yourself", 400));
+    }
+
     if (!recipient.subscriptionId) {
         return next(new CustomError("The receiving user hasn't subscribed to any plan", 403));
     }
 
-    user.balance -= +amount;
-    recipient.balance += +amount;
+  user.balance -= +amount;
+  recipient.balance += +amount;
 
-    await user.save();
-    await recipient.save();
+  await user.save();
+  await recipient.save();
 
     await Transaction.create({
         senderAccount: user.accountNumber,
@@ -71,18 +75,18 @@ exports.transferFunds = asyncErrorHandler(async (request, response, next) => {
 });
 
 exports.getTransactionHistory = asyncErrorHandler(
-    async (request, response, next) => {
-        const { accountNumber } = request.user;
+  async (request, response, next) => {
+    const { accountNumber } = request.user;
 
-        if (!accountNumber) {
-            const error = new CustomError("Account number is required", 400);
-            return next(error);
-        }
+    if (!accountNumber) {
+      const error = new CustomError("Account number is required", 400);
+      return next(error);
+    }
 
-        const { page, pageLimit } = request.query;
-        const pageNumber = +page || 1;
-        const limit = +pageLimit || 10;
-        const offset = (pageNumber - 1) * limit;
+    const { page, pageLimit } = request.query;
+    const pageNumber = +page || 1;
+    const limit = +pageLimit || 5;
+    const offset = (pageNumber - 1) * limit;
 
         const transactions = await Transaction.findAndCountAll({
             where: {
@@ -107,23 +111,23 @@ exports.getTransactionHistory = asyncErrorHandler(
             offset,
           });
 
-        return response.status(200).json({ transactions });
-    }
+    return response.status(200).json({ transactions });
+  }
 );
 
 exports.getInvoiceHistory = asyncErrorHandler(
-    async (request, response, next) => {
-        const { accountNumber } = request.user;
-        const { start, end } = request.query;
+  async (request, response, next) => {
+    const { accountNumber } = request.user;
+    const { start, end } = request.query;
 
-        console.log("Start:", start, "End:", end);
+    console.log("Start:", start, "End:", end);
 
-        if (!accountNumber) {
-            const error = new CustomError("Account number is required", 400);
-            return next(error);
-        }
+    if (!accountNumber) {
+      const error = new CustomError("Account number is required", 400);
+      return next(error);
+    }
 
-        const rawQuery = `
+    const rawQuery = `
     SELECT "transactionId", "senderAccount", "receiverAccount", "amount", "createdAt", "status"
     FROM "Transactions"
     WHERE ("senderAccount" = :account OR "receiverAccount" = :account)
@@ -132,18 +136,20 @@ exports.getInvoiceHistory = asyncErrorHandler(
     ORDER BY "createdAt" DESC;
 `;
 
-        const invoices = await sequelize.query(rawQuery, {
-            replacements: {
-                account: accountNumber,
-                startDate: start,
-                endDate: end,
-            },
-            type: sequelize.QueryTypes.SELECT,
-        });
+    const invoices = await sequelize.query(rawQuery, {
+      replacements: {
+        account: accountNumber,
+        startDate: start,
+        endDate: end,
+      },
+      type: sequelize.QueryTypes.SELECT,
+    });
 
-        const totalAmount = invoices.reduce((acc, curr) => acc + curr.amount, 0);
-        const totalTransactions = invoices.length;
+    const totalAmount = invoices.reduce((acc, curr) => acc + curr.amount, 0);
+    const totalTransactions = invoices.length;
 
-        return response.status(200).json({ totalAmount, totalTransactions, invoices });
-    }
+    return response
+      .status(200)
+      .json({ totalAmount, totalTransactions, invoices });
+  }
 );

@@ -26,7 +26,7 @@ const baseURL = process.env.baseURL
           // the actual Session ID is returned in the query parameter when your customer
           // is redirected to the success page.
           success_url: `http://localhost:5173/paymentChecker?session_id={CHECKOUT_SESSION_ID}`,
-          cancel_url: `${baseURL}/paymentFailed`,
+          cancel_url: `http://localhost:5173/paymentFailed`,
           metadata: {
             userId: userId.toString(), // or any identifier you want to use later
             subscriptionId

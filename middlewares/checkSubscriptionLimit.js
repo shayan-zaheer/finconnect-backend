@@ -18,7 +18,7 @@ const checkSubscriptionLimit = asyncErrorHandler(async (req, res, next) => {
         include: {
             model: Subscription,
             as: "Subscription",
-            attributes: ["transactionLimit", "price"],
+            attributes: ["transactionLimit", "price","transactionPerDay"],
         },
     });
 
@@ -32,26 +32,20 @@ const checkSubscriptionLimit = asyncErrorHandler(async (req, res, next) => {
     const limit = await Limit.findOne({
         where: { userId: sender },
     });
-
+    console.log(limit.dataValues)
     if (!limit) {
         return next({
             status: 403,
             message: "Limit record not found for user",
         });
     }
-
-    const maxTransactions = user.Subscription.transactionLimit;
+console.log(user.Subscription,"DVVS")
+    const maxTransactions = user.Subscription.transactionPerDay;
     const maxAmount = user.Subscription.transactionLimit;
-
-    console.log('MAX TRANSACTIONS', maxTransactions)
-    console.log('MAX AMOUNT', maxAmount)
-
-    console.log(limit)
     const totalTransactionsAfterThis = limit.noOfTransactions + 1;
     const totalAmountAfterThis = limit.transactionAmount + amount;
 
-    console.log('TOTAL TRANSACTIONS', totalTransactionsAfterThis)
-    console.log('TOTAL AMOUNT', totalAmountAfterThis)
+   
 
     if (
         totalTransactionsAfterThis > maxTransactions ||
