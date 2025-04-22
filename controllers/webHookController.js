@@ -66,7 +66,9 @@ exports.listenWebhooks = asyncErrorHandler(async (req,res,next)=>{
       // This approach helps you avoid hitting rate limits.
       console.log(data.object.hosted_invoice_url)
      let res2 = await Limit.update({
-        lastBilledOn: new Date()
+        lastBilledOn: new Date(),
+        transactionAmount: 0,
+        noOfTransactions:0
       },{
         where:{
             userId

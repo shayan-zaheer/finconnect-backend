@@ -2,11 +2,12 @@ const express = require("express");
 const router = express.Router();
 const User = require("../models/User");
 const { v4: uuidv4 } = require("uuid");
+const protect = require("../middlewares/auth");
 const CustomError = require("../utils/CustomError");
 const asyncErrorHandler = require("../utils/asyncErrorHandler");
 
-router.post("/generate", asyncErrorHandler(async (request, response) => {
-    const { accountNumber } = request.body;
+router.post("/generate", protect, asyncErrorHandler(async (request, response) => {
+    const { accountNumber } = request.user;
 
         const user = await User.findOne({ where: { accountNumber } });
         if (!user){

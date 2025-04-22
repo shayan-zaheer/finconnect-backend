@@ -8,9 +8,12 @@ const globalErrorHandler = require('./controllers/errorController');
 const { startSQL } = require('./config/db');
 const paymentRoutes = require("./routes/stripeRoutes")
 const webHookController = require("./controllers/webHookController")
-
+const dashboardRoutes = require("./routes/dashboardRoutes")
 const fintechRoutes = require("./routes/fintechRoutes");
+const subscriptionRoutes = require("./routes/subscriptionRoutes");
+const adminRoutes = require("./routes/adminRoutes");
 const apiRoutes = require("./routes/apiRoutes");
+const activityLogger = require("./middlewares/logger");
 
 const app = express();
 const PORT = 8000;
@@ -28,10 +31,15 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(morgan("dev"));
 
+app.use(activityLogger);
+
 app.use("/api/auth", authRoutes);
 app.use("/api/pay",paymentRoutes)
 app.use("/api/fintech",fintechRoutes);
 app.use("/api/key", apiRoutes);
+app.use("/api/subscription", subscriptionRoutes);
+app.use("/api/admin", adminRoutes);
+app.use("/api/dashboard", dashboardRoutes);
 
 startSQL();
 

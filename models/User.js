@@ -59,7 +59,6 @@ const User = sequelize.define(
         stripeSubId:{
             type: DataTypes.TEXT,
             allowNull: true
-
         }
     },
     {
@@ -78,5 +77,15 @@ const User = sequelize.define(
         timestamps: true,
     }
 );
+
+User.belongsTo(Subscription, {
+    foreignKey: "subscriptionId",
+    as: "Subscription",
+});
+
+Subscription.hasMany(User, {
+    foreignKey: "subscriptionId",
+    as: "Users",
+});
 
 module.exports = User;
