@@ -51,9 +51,15 @@ const User = sequelize.define(
             allowNull: true,
             unique: true,
         },
+        //for stripe
         customerId: {
             type: DataTypes.TEXT,
             allowNull: true
+        },
+        stripeSubId:{
+            type: DataTypes.TEXT,
+            allowNull: true
+
         }
     },
     {
