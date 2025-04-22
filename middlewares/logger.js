@@ -24,9 +24,19 @@ const activityLogger = (req, res, next) => {
         const status = res.statusCode;
         const duration = Date.now() - start;
 
-        logger.info(
-            `User ${user} made a ${method} request to ${url} → Status ${status} (${duration}ms)`
-        );
+        if(status >= 500) {
+            logger.error(
+                `User ${user} made a ${method} request to ${url} → Status ${status} (${duration}ms)`
+            );
+        } else if(status >= 400) {
+            logger.warn(
+                `User ${user} made a ${method} request to ${url} → Status ${status} (${duration}ms)`
+            );
+        } else {
+            logger.info(
+                `User ${user} made a ${method} request to ${url} → Status ${status} (${duration}ms)`
+            );
+        }
     });
 
     next();
