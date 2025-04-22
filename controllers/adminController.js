@@ -1,8 +1,10 @@
-const { Op } = require("sequelize");
 const Subscription = require("../models/Subscription");
+const Transaction = require("../models/Transaction");
 const User = require("../models/User");
 const asyncErrorHandler = require("../utils/asyncErrorHandler");
+const { startOfMonth, endOfMonth, getDate } = require("date-fns");
 const fs = require("fs");
+const { Op } = require("sequelize");
 
 exports.getAllUsers = asyncErrorHandler(async (request, response, next) => {
   const users = await User.findAll({
@@ -47,6 +49,11 @@ exports.getUsersBySubscription = asyncErrorHandler(
           [Op.ne]: null,
         },
       },
+      attributes: ["name"],
+      include: {
+        model: Subscription,
+        as: "Subscription",
+      },
     });
 
     if (users.length === 0) {
@@ -71,3 +78,73 @@ exports.getUsersBySubscription = asyncErrorHandler(
     return response.status(200).json(subscriptionCounts);
   }
 );
+
+exports.getStats = asyncErrorHandler(async (req, res, next) => {
+  const [totalUsers, totalTransactions, avgResult] = await Promise.all([
+    User.count(),
+    Transaction.count(),
+    Transaction.findAll({
+      attributes: [
+        [
+          Transaction.sequelize.fn("AVG", Transaction.sequelize.col("amount")),
+          "avgAmount",
+        ],
+      ],
+      raw: true,
+    }),
+  ]);
+
+  const avgAmount = parseFloat(avgResult[0].avgAmount || 0).toFixed(2);
+
+  return res.status(200).json([
+    {
+      title: "Total Users",
+      value: totalUsers,
+    },
+    {
+      title: "Total Transactions",
+      value: totalTransactions,
+    },
+    {
+      title: "Average Transaction amount",
+      value: avgAmount,
+    },
+  ]);
+});
+exports.getMonthlyTransactionsAdmin = async (req, res) => {
+    try {
+        const {userId, month } = req.query; // month: "2025-04"
+
+        if (!month) {
+            return res.status(400).json({ error: " month are required" });
+        }
+
+        const startDate = startOfMonth(new Date(`${month}-01`));
+        const endDate = endOfMonth(startDate);
+
+        const transactions = await Transaction.findAll({
+            where: {
+                createdAt: {
+                    [Op.between]: [startDate, endDate],
+                }
+            }
+        });
+        console.log(transactions)
+        const debitMap = {};
+        const creditMap = {};
+        let obj ={}
+
+        transactions.forEach(tx => {
+            const day = getDate(tx.createdAt).toString(); // e.g., "5"
+            obj[day] = (obj[day] || 0) + tx.amount;
+        });
+        // Convert maps to array
+
+        return res.json(obj);
+
+    } catch (error) {
+        console.error("Error fetching transactions:", error);
+        return res.status(500).json({ error: "Internal server error" });
+    }
+};
+
