@@ -15,9 +15,9 @@ const StripeInvoice = sequelize.define("StripeInvoice", {
             model: User,
             key: "accountNumber",
         },
-        invoiceUrl: {
-            type: DataTypes.UUID,
-        },
+    },
+    invoiceUrl: {
+        type: DataTypes.UUID,
     },
 });
 
