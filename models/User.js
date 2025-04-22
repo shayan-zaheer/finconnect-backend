@@ -44,7 +44,7 @@ const User = sequelize.define(
         },
         balance: {
             type: DataTypes.INTEGER,
-            defaultValue: 0,
+            defaultValue: 500
         },
         apiKey: {
             type: DataTypes.STRING,

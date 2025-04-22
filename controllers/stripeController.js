@@ -1,3 +1,4 @@
+const Limit = require('../models/Limit');
 const User = require('../models/User');
 const asyncErrorHandler = require('../utils/asyncErrorHandler');
 
@@ -88,6 +89,11 @@ exports.deleteSubscription = asyncErrorHandler(async (req, res, next) => {
         }
       })
 
+      await Limit.destroy({
+        where:{
+          userId
+        }
+      })
       
 
       return res.status(200).json({
