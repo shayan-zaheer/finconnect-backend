@@ -1,4 +1,5 @@
 const User = require("../models/User");
+const Limit = require("../models/User");
 const Transaction = require("../models/Transaction");
 const asyncErrorHandler = require("../utils/asyncErrorHandler");
 const CustomError = require("../utils/CustomError");
@@ -57,6 +58,15 @@ exports.transferFunds = asyncErrorHandler(async (request, response, next) => {
         status: "completed",
     });
 
+    
+    const limit = await Limit.findOne({
+        where: { userId: user.accountNumber },
+    });
+
+    limit.transactionAmount += +amount;
+    limit.noOfTransactions += 1;
+
+    await limit.save();
     return response.status(200).json({ message: "Transfer successful" });
 });
 
@@ -69,11 +79,6 @@ exports.getTransactionHistory = asyncErrorHandler(
             return next(error);
         }
 
-        const { page, pageLimit } = request.query;
-        const pageNumber = +page || 1;
-        const limit = +pageLimit || 10;
-        const offset = (pageNumber - 1) * limit;
-
         const transactions = await Transaction.findAndCountAll({
             where: {
                 [Op.or]: [
@@ -81,8 +86,6 @@ exports.getTransactionHistory = asyncErrorHandler(
                     { receiverAccount: accountNumber },
                 ],
             },
-            limit,
-            offset,
         });
 
         return response.status(200).json({ transactions });

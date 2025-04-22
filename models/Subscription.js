@@ -36,9 +36,9 @@ const Subscription = sequelize.define(
         priority: {
             type: DataTypes.BOOLEAN,
             allowNull: false,
-        },
-        price_id:{
-            type:DataTypes.TEXT,
+        }, 
+        price_id: {
+            type: DataTypes.TEXT,
             allowNull:true
         }
     }
