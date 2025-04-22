@@ -37,9 +37,7 @@ const Subscription = sequelize.define(
             type: DataTypes.BOOLEAN,
             allowNull: false,
         }
-    }, {
-        freezeTableName: true // prevents Sequelize from pluralizing
-      }
+    }
 );
 
 module.exports = Subscription;

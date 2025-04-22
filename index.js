@@ -6,6 +6,11 @@ const morgan = require('morgan');
 const authRoutes = require("./routes/authRoutes");
 const globalErrorHandler = require('./controllers/errorController');
 const { startSQL } = require('./config/db');
+const paymentRoutes = require("./routes/stripeRoutes")
+const webHookController = require("./controllers/webHookController")
+
+const fintechRoutes = require("./routes/fintechRoutes");
+const apiRoutes = require("./routes/apiRoutes");
 
 const app = express();
 const PORT = 8000;
@@ -15,6 +20,8 @@ app.use(cors({
     credentials: true,
 }));
 
+app.post("/webhooks", express.raw({ type: 'application/json' }),webHookController.listenWebhooks)
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -22,6 +29,9 @@ app.use(cookieParser());
 app.use(morgan("dev"));
 
 app.use("/api/auth", authRoutes);
+app.use("/api/pay",paymentRoutes)
+app.use("/api/fintech",fintechRoutes);
+app.use("/api/key", apiRoutes);
 
 startSQL();
 
@@ -30,3 +40,5 @@ app.use(globalErrorHandler);
 app.listen(PORT, () => {
     console.log(`Server is listening on PORT ${PORT}`);
 });
+
+module.exports = {express}
