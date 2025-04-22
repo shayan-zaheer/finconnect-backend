@@ -1,7 +1,9 @@
+const Subscription = require("../models/Subscription");
 const Transaction = require("../models/Transaction");
 const User = require("../models/User");
 const asyncErrorHandler = require("../utils/asyncErrorHandler");
 const fs = require("fs");
+const { Op } = require("sequelize");
 
 exports.getAllUsers = asyncErrorHandler(async (request, response, next) => {
     const users = await User.findAll({
