@@ -1,63 +1,68 @@
-
-const Limit = require('../models/Limit');
-const Subscription = require('../models/Subscription');
-const User = require('../models/User');
-const asyncErrorHandler = require('../utils/asyncErrorHandler');
+const Limit = require("../models/Limit");
+const Subscription = require("../models/Subscription");
+const User = require("../models/User");
+const asyncErrorHandler = require("../utils/asyncErrorHandler");
 
 const checkSubscriptionLimit = asyncErrorHandler(async (req, res, next) => {
-  const { accountNumber, amount } = req.body;
+    const { accountNumber, amount } = req.body;
 
-  if (!accountNumber || typeof amount !== 'number') {
-    return next({
-      status: 400,
-      message: 'Missing or invalid accountNumber or amount'
+    if (!accountNumber || typeof amount !== "number") {
+        return next({
+            status: 400,
+            message: "Missing or invalid accountNumber or amount",
+        });
+    }
+
+    const user = await User.findOne({
+        where: { accountNumber: accountNumber },
+        include: {
+            model: Subscription,
+            as: "Subscription",
+            attributes: ["transactionLimit", "price"],
+        },
     });
-  }
 
-  // Step 1: Get the user and their subscription
-  const user = await User.findOne({
-    where: { accountNumber: accountNumber },
-    include: {
-      model: Subscription,
-      attributes: ['transactionLimit', 'price'],
-    },
-  });
+    if (!user || !user.subscriptionId) {
+        return next({
+            status: 404,
+            message: "User or their subscription not found",
+        });
+    }
 
-  if (!user || !user.subscriptionId) {
-    return next({
-      status: 404,
-      message: 'User or their subscription not found'
+    const limit = await Limit.findOne({
+        where: { userId: accountNumber },
     });
-  }
 
-  // Step 2: Get their current usage from the Limit table
-  const limit = await Limit.findOne({
-    where: { accountNumber },
-  });
+    if (!limit) {
+        return next({
+            status: 403,
+            message: "Limit record not found for user",
+        });
+    }
 
-  if (!limit) {
-    return next({
-      status: 403,
-      message: 'Limit record not found for user'
-    });
-  }
+    const maxTransactions = user.Subscription.transactionLimit;
+    const maxAmount = user.Subscription.price;
 
-  const maxTransactions = user.Subscription.transactionLimit;
-  const maxAmount = user.Subscription.price;
+    console.log('MAX TRANSACTIONS', maxTransactions)
+    console.log('MAX AMOUNT', maxAmount)
 
-  const totalTransactionsAfterThis = limit.noOfTransactions + 1;
-  const totalAmountAfterThis = limit.transactionAmount + amount;
+    const totalTransactionsAfterThis = limit.noOfTransactions + 1;
+    const totalAmountAfterThis = limit.transactionAmount + amount;
 
-  // Step 3: Check limits
-  if (totalTransactionsAfterThis > maxTransactions || totalAmountAfterThis > maxAmount) {
-    return next({
-      status: 403,
-      message: 'Transaction limit exceeded for your subscription plan'
-    });
-  }
+    console.log('TOTAL TRANSACTIONS', totalTransactionsAfterThis)
+    console.log('TOTAL AMOUNT', totalAmountAfterThis)
 
-  // ✅ All good
-  next();
+    if (
+        totalTransactionsAfterThis > maxTransactions ||
+        totalAmountAfterThis > maxAmount
+    ) {
+        return next({
+            status: 403,
+            message: "Transaction limit exceeded for your subscription plan",
+        });
+    }
+
+    next();
 });
 
 module.exports = checkSubscriptionLimit;

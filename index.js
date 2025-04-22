@@ -11,6 +11,7 @@ const webHookController = require("./controllers/webHookController")
 
 const fintechRoutes = require("./routes/fintechRoutes");
 const apiRoutes = require("./routes/apiRoutes");
+const activityLogger = require("./middlewares/logger");
 
 const app = express();
 const PORT = 8000;
@@ -27,6 +28,8 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use(cookieParser());
 app.use(morgan("dev"));
+
+app.use(activityLogger);
 
 app.use("/api/auth", authRoutes);
 app.use("/api/pay",paymentRoutes)
