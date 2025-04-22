@@ -10,6 +10,8 @@ const paymentRoutes = require("./routes/stripeRoutes")
 const webHookController = require("./controllers/webHookController")
 
 const fintechRoutes = require("./routes/fintechRoutes");
+const subscriptionRoutes = require("./routes/subscriptionRoutes");
+const adminRoutes = require("./routes/adminRoutes");
 const apiRoutes = require("./routes/apiRoutes");
 const activityLogger = require("./middlewares/logger");
 
@@ -35,6 +37,8 @@ app.use("/api/auth", authRoutes);
 app.use("/api/pay",paymentRoutes)
 app.use("/api/fintech",fintechRoutes);
 app.use("/api/key", apiRoutes);
+app.use("/api/subscription", subscriptionRoutes);
+app.use("/api/admin", adminRoutes);
 
 startSQL();
 
