@@ -129,18 +129,24 @@ exports.getMonthlyTransactionsAdmin = async (req, res) => {
                 }
             }
         });
-        console.log(transactions)
+        // console.log(transactions)
         const debitMap = {};
         const creditMap = {};
-        let obj ={}
-
+        let arr =[]
+        let mainObj ={}
         transactions.forEach(tx => {
+          let obj ={}
             const day = getDate(tx.createdAt).toString(); // e.g., "5"
-            obj[day] = (obj[day] || 0) + tx.amount;
+            console.log("day",day)
+            obj.day = day
+            let rev = (mainObj[day] ||0 ) + tx.amount
+            obj[`revenue`] = rev;
+            mainObj[day] = rev 
+            arr.push(obj)
         });
         // Convert maps to array
 
-        return res.json(obj);
+        return res.json({debit:arr,credit:arr});
 
     } catch (error) {
         console.error("Error fetching transactions:", error);
