@@ -5,8 +5,9 @@ const { v4: uuidv4 } = require("uuid");
 const protect = require("../middlewares/auth");
 const CustomError = require("../utils/CustomError");
 const asyncErrorHandler = require("../utils/asyncErrorHandler");
+const userRateLimiter = require("../middlewares/limit");
 
-router.post("/generate", protect, asyncErrorHandler(async (request, response) => {
+router.post("/generate", userRateLimiter, protect, asyncErrorHandler(async (request, response) => {
     const { accountNumber } = request.user;
 
         const user = await User.findOne({ where: { accountNumber } });
